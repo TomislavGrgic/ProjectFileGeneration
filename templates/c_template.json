@@ -1,0 +1,71 @@
+{
+    "name" : "root",
+    "type" : "folder",
+    "content" : "",
+    "files" : [
+        {
+            "name" : "src",
+            "type" : "folder",
+            "content" : "",
+            "files" : [
+                {
+                    "name" : "modules",
+                    "type" : "folder",
+                    "content" : "",
+                    "files" : []
+                }, {
+                    "name" : "debug",
+                    "type" : "folder",
+                    "content" : "",
+                    "files" : [
+                        {
+                            "name" : "serialDebug",
+                            "type" : "c",
+                            "content" : "",
+                            "files" : []
+                        }
+                    ]
+                }, {
+                    "name" : "utils",
+                    "type" : "c",
+                    "content" : "",
+                    "files" : []
+                }
+            ]
+        }, {
+            "name" : "include",
+            "type" : "folder",
+            "content" : "",
+            "files" : [
+                {
+                    "name" : "modules",
+                    "type" : "folder",
+                    "content" : "",
+                    "files" : []
+                }, {
+                    "name" : "debug",
+                    "type" : "folder",
+                    "content" : "",
+                    "files" : [
+                        {
+                            "name" : "serialDebug",
+                            "type" : "h",
+                            "content" : "",
+                            "files" : []
+                        }
+                    ]
+                }, {
+                    "name" : "utils",
+                    "type" : "h",
+                    "content" : "",
+                    "files" : []
+                }
+            ]
+        }, {
+            "name" : "main",
+            "type" : "c",
+            "content" : "#include <stdio.h>\r\nint main(void){\r\treturn 1;\r}",
+            "files" : []
+        }
+    ]
+}
