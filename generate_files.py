@@ -1,6 +1,7 @@
 import os
 import sys
 import json
+import re
 
 PATH_ARGUMENT = 1
 
@@ -12,9 +13,41 @@ purple_code = '\033[95m'  # ANSI escape code for purple text
 cyan_code = '\033[96m'  # ANSI escape code for cyan text
 reset_code = '\033[0m'    # Reset the color to default
 
-filegen_prompt = f"{purple_code}[File generator]{green_code} >> {reset_code}"
+content_pattern = r'@.*?\.json'
 
+filegen_prompt = f"{purple_code}[File generator]{green_code} >> {reset_code}"
 option_names = ['Generate Core', 'Generate Core with Support', 'Custom generation', 'Exit']
+keyword_list = ['$NAME_UPPER$', '$NAME_LOWER$', '$NAME$']
+
+python_script_path = os.getcwd()
+project_root_path = os.getcwd()
+
+def loadTemplateFile(template_name: str):
+    os.chdir(python_script_path)
+    f = open(os.path.join('data','templates', template_name))
+    template_file = json.load(f)
+    f.close()
+    os.chdir(project_root_path)
+
+    return template_file
+
+
+def printOutJSONLoop(json_data, tab_cnt):
+    for i,file in enumerate(json_data["files"]):
+        print(('    '*tab_cnt) + f'{purple_code}- {reset_code}{file["name"]}' + (f'/' if file["type"] == "folder" else f'.{file["type"]}'))
+        if file["files"] is not []:
+            printOutJSONLoop(file, tab_cnt+1)
+
+
+def addFileToDirectoryJSON(dest, src, path):
+    return
+
+
+def printOutJSON(json_data):
+    tab_cnt = 1
+    print(f"{filegen_prompt}Printing out the JSON template directory tree. {reset_code}\r")
+    printOutJSONLoop(json_data, tab_cnt)
+
 
 def generateFromJSON(json_data, path):
     for file in json_data["files"]:
@@ -49,12 +82,16 @@ def splashScreen():
     print(f'{reset_code}')
 
 
+def displayFooter():
+    print(f'\tFor more information type{cyan_code} -help{reset_code} \r\n')
+
+
 def displayMenus():
     print(f'\tChoose one of the following options by typing the index number: \r\n')
     for i,names in enumerate(option_names):
         print(f'\t{purple_code}{i+1}) {reset_code} {names}\r')
     print("\r")
-    print(f'\tFor more information type{cyan_code} -help{reset_code} \r\n')
+    displayFooter()
 
 
 def getFolderPathArgument():
@@ -100,20 +137,11 @@ def createDoubleDirectory(name, path = None):
     createSingleDirectory(name, os.path.join('include', path))
 
 
-
-def createFile(name, path = None, type = None):
-    path = f"{path}" if path is not None else ""
-    
-    if type == 'c' or type == None:
-        createSourceFile(name = name, path = os.path.join('src', path), include_path = f'include/{path}')
-    if type == 'h' or type == None:
-        createHeaderFile(name = name, path = os.path.join('include', path))
-
-
 def goToRootPath():
+    global project_root_path
     project_root_path = getFolderPathArgument()
-    if project_root_path is not None:
 
+    if project_root_path is not None:
         try:
             os.mkdir(project_root_path)
         except:
@@ -132,19 +160,10 @@ def generateSupportFiles():
     createSingleDirectory(name = "types", path = "include")
 
     #Create main file
-    createFile(name = "debugSerial", path = "debug")
-    createFile(name = "utils")
-
-
-def createSourceFile(name, path = None, include_path = None, append_code = None):
-    append_code = "" if append_code is None else append_code
-    include_path = "" if include_path is None else f'#include \"{include_path}{name}.h\"\r'
-    createAnyFile(name, 'c', path, f'{include_path}{append_code}')
-
-
-def createHeaderFile(name, path = None, append_code = None):
-    append_code = f'' if append_code is None else append_code
-    createAnyFile(name, 'h', path, f'#ifndef __{name.upper()}_H__\r#define __{name.upper()}_H__\r\r{append_code}\r#endif /*__{name.upper()}_H__*/')
+    createAnyFile(name = "debugSerial", type = 'c', path = os.path.join('src', 'debug'))
+    createAnyFile(name = "debugSerial", type = 'h', path = os.path.join('include', 'debug'))
+    createAnyFile(name = "utils", type = 'c', path = 'src')
+    createAnyFile(name = "utils", type = 'h', path = 'include')
 
 
 def createAnyFile(name, type, path = None, append_code = None):
@@ -160,10 +179,49 @@ def createAnyFile(name, type, path = None, append_code = None):
     file = open(file_path, 'x')
     
     if append_code is not None:
+        append_code = substituteContents(append_code)
+        append_code = substituteKeywords(append_code, name)
         file.write(f'{append_code}')
 
     file.close()
     print(f"{filegen_prompt}File created: {cyan_code}{name}.{type}{reset_code}\r")
+
+
+def substituteContents(append_code: str):
+    modified_code = append_code
+    match_list = re.findall(content_pattern, modified_code)
+    
+    if not match_list:
+        return modified_code
+    
+    os.chdir(python_script_path)
+
+    for json_pattern in match_list:
+        json_file_name = json_pattern.replace('@', '')
+        f = open(os.path.join('data','contents', json_file_name))
+        json_file = json.load(f)
+        f.close()
+        modified_code = modified_code.replace(json_pattern, json_file["content"])
+    
+    os.chdir(project_root_path)
+
+    return modified_code
+
+
+def substituteKeywords(append_code: str, name):
+    modified_code = append_code
+
+    while '$NAME_UPPER$' in modified_code:
+        modified_code = modified_code.replace('$NAME_UPPER$', name.upper())
+
+    while '$NAME_LOWER$' in modified_code:
+        modified_code = modified_code.replace('$NAME_LOWER$', name.upper())
+
+    while '$NAME$' in modified_code:
+        modified_code = modified_code.replace('$NAME$', name.upper())
+
+    return modified_code
+
 
 def inputHandler():
     input_val: str = input(f"\t{cyan_code}User input: {reset_code}")
@@ -171,11 +229,9 @@ def inputHandler():
 
     match input_val:
         case '1':
-            f = open(os.path.join('templates', 'c_template.json'))
-            generate_template = json.load(f)
-            f.close()
-
             goToRootPath()
+            generate_template = loadTemplateFile('c_template.json')
+            printOutJSON(generate_template)
             generateFromJSON(generate_template, None)
 
         case '2':

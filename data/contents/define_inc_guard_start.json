@@ -1,0 +1,4 @@
+{
+	"content" : "#ifndef __$NAME_UPPER$_H__\r#define __$NAME_UPPER$_H__\r\n",
+	"description" : ""
+}

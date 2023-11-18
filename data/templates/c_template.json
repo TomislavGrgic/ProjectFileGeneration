@@ -1,22 +1,22 @@
 {
     "name" : "root",
     "type" : "folder",
-    "content" : "",
     "files" : [
         {
+            "name" : "lib",
+            "type" : "folder",
+            "files" : []
+        }, {
             "name" : "src",
             "type" : "folder",
-            "content" : "",
             "files" : [
                 {
                     "name" : "modules",
                     "type" : "folder",
-                    "content" : "",
                     "files" : []
                 }, {
                     "name" : "debug",
                     "type" : "folder",
-                    "content" : "",
                     "files" : [
                         {
                             "name" : "serialDebug",
@@ -40,31 +40,29 @@
                 {
                     "name" : "modules",
                     "type" : "folder",
-                    "content" : "",
                     "files" : []
                 }, {
                     "name" : "debug",
                     "type" : "folder",
-                    "content" : "",
                     "files" : [
                         {
                             "name" : "serialDebug",
                             "type" : "h",
-                            "content" : "",
+                            "content" : "@define_inc_guard_start.json@define_inc_guard_end.json",
                             "files" : []
                         }
                     ]
                 }, {
                     "name" : "utils",
                     "type" : "h",
-                    "content" : "",
+                    "content" : "@define_inc_guard_start.json@define_inc_guard_end.json",
                     "files" : []
                 }
             ]
         }, {
             "name" : "main",
             "type" : "c",
-            "content" : "#include <stdio.h>\r\nint main(void){\r\treturn 1;\r}",
+            "content" : "@c_void_main.json",
             "files" : []
         }
     ]
